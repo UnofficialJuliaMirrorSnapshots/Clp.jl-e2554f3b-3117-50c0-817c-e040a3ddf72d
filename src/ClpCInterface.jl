@@ -1,7 +1,6 @@
 module ClpCInterface
 
-using Compat
-using Compat.SparseArrays
+using SparseArrays
 
 export
     # Types
@@ -223,7 +222,7 @@ mutable struct ClpModel
     function ClpModel()
         p = @clp_ccall newModel Ptr{Cvoid} ()
         prob = new(p)
-        @compat finalizer(delete_model, prob)
+        finalizer(delete_model, prob)
         return prob
     end
 end
@@ -242,7 +241,7 @@ mutable struct ClpSolve
     function ClpSolve()
         p = @clpsolve_ccall new Ptr{Cvoid} ()
         prob = new(p)
-        @compat finalizer(delete_solve, prob)
+        finalizer(delete_solve, prob)
         return prob
     end
 end
@@ -988,7 +987,7 @@ function row_name(model::ClpModel, row::Integer)
     _jl__check_model(model)
     _jl__check_row_is_valid(model, row)
     size = @clp_ccall lengthNames Int32 (Ptr{Cvoid},) model.p
-    row_name = Array{UInt8}(size+1)
+    row_name = Array{UInt8}(undef, size+1)
     @clp_ccall rowName Cvoid (Ptr{Cvoid}, Int32, Ptr{UInt8}) model.p (row-1) row_name
     return unsafe_string(row_name)
 end
@@ -1001,7 +1000,7 @@ function column_name(model::ClpModel, col::Integer)
     _jl__check_model(model)
     _jl__check_col_is_valid(model, col)
     size = @clp_ccall lengthNames Int32 (Ptr{Cvoid},) model.p
-    col_name = Array{UInt8}(size+1)
+    col_name = Array{UInt8}(undef, size+1)
     @clp_ccall columnName Cvoid (Ptr{Cvoid}, Int32, Ptr{UInt8}) model.p (col-1) col_name
     return unsafe_string(col_name)
 end
